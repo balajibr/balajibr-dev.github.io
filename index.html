@@ -15,10 +15,13 @@
         .icon-sm { width: 18px; height: 18px; }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         
+        /* Compact Mode adjustments */
+        .compact-hidden { display: block; }
         body.compact .compact-hidden { display: none; }
         body.compact .timer-container { transform: scale(0.85); margin-top: -40px; }
         body.compact .controls-container { margin-top: -10px; gap: 10px; }
         
+        /* Smooth transitions */
         .settings-panel {
             transition: all 0.3s ease-in-out;
             max-height: 0;
@@ -26,22 +29,32 @@
             overflow: hidden;
         }
         .settings-panel.visible {
-            max-height: 250px;
+            max-height: 200px;
             opacity: 1;
             margin-top: 2rem;
         }
-        .shadow-glow-blue { filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5)); }
-        .shadow-glow-emerald { filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.5)); }
-        .shadow-glow-orange { filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.5)); }
     </style>
 </head>
-<body class="transition-colors duration-700 bg-[#0f172a] text-slate-100 min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden" id="body-bg">
+<body class="transition-colors duration-500 bg-[#0f172a] text-slate-100 min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden" id="body-bg">
     
-   
+    <!-- Header (Hidden in Compact)
+    <div class="max-w-md w-full text-center mb-8 compact-hidden">
+        <h1 class="text-4xl font-bold flex items-center justify-center gap-3">
+            <span id="eye-icon-work" class="text-blue-400">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0z"/><circle cx="12" cy="12" r="3"/></svg>
+            </span>
+            <span id="eye-icon-break" class="text-emerald-400 hidden">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+            </span>
+            20-20-20
+        </h1>
+    </div> -->
+
+    <!-- Main Timer Circle -->
     <div class="timer-container relative flex items-center justify-center w-64 h-64 md:w-80 md:h-80 transition-transform">
         <svg class="w-full h-full">
             <circle cx="50%" cy="50%" r="45%" class="stroke-slate-800 fill-none" stroke-width="8" />
-            <circle id="progress-ring" cx="50%" cy="50%" r="45%" class="progress-ring__circle fill-none stroke-blue-500 shadow-glow-blue" stroke-width="8" stroke-linecap="round" />
+            <circle id="progress-ring" cx="50%" cy="50%" r="45%" class="progress-ring__circle fill-none stroke-blue-500 shadow-glow" stroke-width="8" stroke-linecap="round" />
         </svg>
         
         <div class="absolute inset-0 flex flex-col items-center justify-center">
@@ -50,6 +63,7 @@
         </div>
     </div>
 
+    <!-- Controls -->
     <div class="controls-container flex flex-wrap justify-center gap-4 mt-10 z-10">
         <button id="reset-btn" class="p-4 rounded-full bg-slate-800 shadow-xl text-slate-400 hover:text-red-400 transition-colors" title="Reset">
             <svg class="icon" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
@@ -73,47 +87,39 @@
         </button>
     </div>
 
+    <!-- Hidden Settings Panel -->
     <div id="settings-panel" class="settings-panel w-full max-w-sm px-4">
-        <div class="bg-slate-800/50 backdrop-blur-md p-6 rounded-3xl border border-slate-700 shadow-2xl space-y-6 mt-4">
+        <div class="bg-slate-800/50 backdrop-blur-md p-6 rounded-3xl border border-slate-700 shadow-2xl space-y-6">
             <div class="flex items-center justify-between">
-                <label for="work-duration-input" class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Work (mins)</label>
+                <label for="work-duration-input" class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Duration (mins)</label>
                 <input type="number" id="work-duration-input" value="20" min="1" max="120" class="w-16 px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg text-center font-bold text-blue-400 outline-none focus:ring-1 focus:ring-blue-500">
             </div>
 
-            <div class="flex items-center justify-between gap-2">
-                <button id="sound-toggle" class="flex items-center gap-3 px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 transition-colors flex-1 justify-center">
+            <div class="flex items-center justify-between">
+                <button id="sound-toggle" class="flex items-center gap-3 px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 transition-colors w-full justify-center">
                     <span id="sound-on-icon"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span>
                     <span id="sound-off-icon" class="hidden"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="m8.7 3A6 6 0 0 1 18 8a21.3 21.3 0 0 1 .6 2.8"/><path d="M17 17H3s3-2 3-9a4.67 4.67 0 0 1 .3-1.7"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/><path d="m2 2 20 20"/></svg></span>
-                    <span id="sound-status-text" class="text-sm font-medium">On</span>
+                    <span id="sound-status-text" class="text-sm font-medium">Sound On</span>
                 </button>
-                <button id="notif-btn" class="px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-blue-400 text-sm font-bold uppercase tracking-widest flex-1">Alerts</button>
             </div>
-            
-            <button id="test-btn" class="w-full text-[10px] text-slate-500 hover:text-slate-300 uppercase tracking-widest text-center">Test Grace Period Sound</button>
+
+            <div class="flex flex-col gap-2 items-center">
+                <button id="notif-btn" class="text-xs text-blue-400 font-semibold uppercase tracking-widest hover:text-blue-300 transition-colors">Enable Alerts</button>
+                <button id="test-btn" class="text-[10px] text-slate-500 hover:text-slate-300 uppercase tracking-widest">Test Notification & Sound</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // Load settings from localStorage
-        const storage = {
-            get: (key, def) => {
-                const val = localStorage.getItem(key);
-                return val === null ? def : (isNaN(val) ? val : parseInt(val));
-            },
-            set: (key, val) => localStorage.setItem(key, val)
-        };
-
-        let workTimeMinutes = storage.get('workMins', 20);
-        let soundEnabled = storage.get('soundEnabled', 'true') === 'true';
-        
+        let workTimeMinutes = 20;
+        let workTimeSeconds = workTimeMinutes * 60;
         const BREAK_TIME = 20;
-        const WARNING_TIME = 5;
         const CIRCUMFERENCE = 2 * Math.PI * 45;
 
-        let timeLeft = workTimeMinutes * 60;
+        let timeLeft = workTimeSeconds;
         let isActive = false;
         let isWorking = true;
-        let isWarning = false;
+        let soundEnabled = true;
         let timerId = null;
         let audioCtx = null;
 
@@ -131,13 +137,9 @@
         const eyeIconWork = document.getElementById('eye-icon-work');
         const eyeIconBreak = document.getElementById('eye-icon-break');
         const workInput = document.getElementById('work-duration-input');
+        const compactToggle = document.getElementById('compact-toggle');
+        const settingsToggleBtn = document.getElementById('settings-toggle-btn');
         const settingsPanel = document.getElementById('settings-panel');
-
-        // Init inputs
-        workInput.value = workTimeMinutes;
-        soundOnIcon.classList.toggle('hidden', !soundEnabled);
-        soundOffIcon.classList.toggle('hidden', soundEnabled);
-        soundStatusText.textContent = soundEnabled ? 'On' : 'Muted';
 
         progressRing.style.strokeDasharray = `${CIRCUMFERENCE}%`;
 
@@ -169,28 +171,23 @@
             const secs = timeLeft % 60;
             timerDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 
-            let total = workTimeMinutes * 60;
-            if (isWarning) total = WARNING_TIME;
-            else if (!isWorking) total = BREAK_TIME;
-
+            const total = isWorking ? (workTimeMinutes * 60) : BREAK_TIME;
             const progress = ((total - timeLeft) / total);
             const offset = CIRCUMFERENCE - (progress * CIRCUMFERENCE);
             progressRing.style.strokeDashoffset = `${offset}%`;
 
-            if (isWarning) {
-                bodyBg.style.backgroundColor = "#431407"; // Deep Orange/Red
-                statusLabel.textContent = "Finish up...";
-                progressRing.className = "progress-ring__circle fill-none stroke-orange-500 shadow-glow-orange";
-            } else if (isWorking) {
-                bodyBg.style.backgroundColor = "#0f172a";
+            if (isWorking) {
+                bodyBg.style.backgroundColor = "#0f172a"; // Slate 900
                 statusLabel.textContent = "Focus";
-                progressRing.className = "progress-ring__circle fill-none stroke-blue-500 shadow-glow-blue";
+                progressRing.classList.remove('stroke-emerald-400');
+                progressRing.classList.add('stroke-blue-500');
                 eyeIconWork.classList.remove('hidden');
                 eyeIconBreak.classList.add('hidden');
             } else {
-                bodyBg.style.backgroundColor = "#064e3b";
+                bodyBg.style.backgroundColor = "#064e3b"; // Emerald 900
                 statusLabel.textContent = "Break";
-                progressRing.className = "progress-ring__circle fill-none stroke-emerald-500 shadow-glow-emerald";
+                progressRing.classList.remove('stroke-blue-500');
+                progressRing.classList.add('stroke-emerald-400');
                 eyeIconWork.classList.add('hidden');
                 eyeIconBreak.classList.remove('hidden');
             }
@@ -198,34 +195,25 @@
             if (isActive) {
                 playIcon.classList.add('hidden');
                 pauseIcon.classList.remove('hidden');
-                toggleBtn.classList.replace('bg-blue-600', 'bg-orange-600');
+                toggleBtn.classList.replace('bg-blue-600', 'bg-orange-500');
             } else {
                 playIcon.classList.remove('hidden');
                 pauseIcon.classList.add('hidden');
-                toggleBtn.classList.replace('bg-orange-600', 'bg-blue-600');
+                toggleBtn.classList.replace('bg-orange-500', 'bg-blue-600');
             }
         }
 
-        function handleTransition() {
+        function handleComplete() {
             if (isWorking) {
-                // Work ended -> Start 5s Warning
-                playBeep(440, 1.5, 0.4); // One long Warning beep
+                playBeep(880, 0.8, 0.4); 
                 isWorking = false;
-                isWarning = true;
-                timeLeft = WARNING_TIME;
-                sendNotification("Break starting in 5s", "Finish what you're doing!");
-            } else if (isWarning) {
-                // Warning ended -> Start 20s Break
-                isWarning = false;
                 timeLeft = BREAK_TIME;
-                sendNotification("Break started!", "Look 20 feet away now.");
+                sendNotification("Time for a break!", "Look 20 feet away for 20 seconds.");
             } else {
-                // Break ended -> Back to Work
-                playBeep(880, 0.5, 0.3);
+                playBeep(440, 0.5, 0.3);
                 isWorking = true;
-                isWarning = false;
                 timeLeft = workTimeMinutes * 60;
-                sendNotification("Back to work", "Session started.");
+                sendNotification("Break over!", "Back to work.");
             }
             updateUI();
         }
@@ -233,15 +221,22 @@
         function tick() {
             if (isActive && timeLeft > 0) {
                 timeLeft--;
-                // Repeating beeps only during actual Break phase
-                if (!isWorking && !isWarning) {
-                    playBeep(660, 0.2, 0.3); 
-                }
+                if (!isWorking) playBeep(660, 0.2, 0.3); 
                 updateUI();
             } else if (timeLeft === 0) {
-                handleTransition();
+                handleComplete();
             }
         }
+
+        workInput.addEventListener('change', (e) => {
+            let val = parseInt(e.target.value) || 20;
+            workTimeMinutes = Math.max(1, Math.min(120, val));
+            e.target.value = workTimeMinutes;
+            if (isWorking && (!isActive || timeLeft > workTimeMinutes * 60)) {
+                timeLeft = workTimeMinutes * 60;
+                updateUI();
+            }
+        });
 
         toggleBtn.addEventListener('click', () => {
             isActive = !isActive;
@@ -252,47 +247,45 @@
         document.getElementById('reset-btn').addEventListener('click', () => {
             isActive = false;
             isWorking = true;
-            isWarning = false;
             timeLeft = workTimeMinutes * 60;
             clearInterval(timerId);
             timerId = null;
             updateUI();
         });
 
-        workInput.addEventListener('change', (e) => {
-            let val = parseInt(e.target.value) || 20;
-            workTimeMinutes = Math.max(1, Math.min(120, val));
-            e.target.value = workTimeMinutes;
-            storage.set('workMins', workTimeMinutes);
-            if (isWorking && !isWarning && !isActive) {
-                timeLeft = workTimeMinutes * 60;
-                updateUI();
+        document.getElementById('test-btn').addEventListener('click', () => {
+            playBeep(660, 0.2, 0.3);
+            if (Notification.permission === "granted") {
+                sendNotification("Test Alert", "This is how your break reminders will look.");
+            } else {
+                alert("Please enable alerts first!");
             }
         });
 
         soundToggle.addEventListener('click', () => {
             soundEnabled = !soundEnabled;
-            storage.set('soundEnabled', soundEnabled);
             soundOnIcon.classList.toggle('hidden', !soundEnabled);
             soundOffIcon.classList.toggle('hidden', soundEnabled);
-            soundStatusText.textContent = soundEnabled ? 'On' : 'Muted';
-        });
-
-        document.getElementById('settings-toggle-btn').addEventListener('click', () => {
-            settingsPanel.classList.toggle('visible');
-        });
-
-        document.getElementById('compact-toggle').addEventListener('click', () => {
-            document.body.classList.toggle('compact');
-            settingsPanel.classList.remove('visible');
+            soundStatusText.textContent = soundEnabled ? 'Sound On' : 'Muted';
         });
 
         document.getElementById('notif-btn').addEventListener('click', () => {
-            Notification.requestPermission();
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    document.getElementById('notif-btn').textContent = "Alerts Enabled ✓";
+                }
+            });
         });
 
-        document.getElementById('test-btn').addEventListener('click', () => {
-            playBeep(440, 1.5, 0.4); // Test the long warning beep
+        compactToggle.addEventListener('click', () => {
+            document.body.classList.toggle('compact');
+            if (document.body.classList.contains('compact')) {
+                settingsPanel.classList.remove('visible');
+            }
+        });
+
+        settingsToggleBtn.addEventListener('click', () => {
+            settingsPanel.classList.toggle('visible');
         });
 
         updateUI();

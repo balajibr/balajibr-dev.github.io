@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>20-20-20 Eye Care</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        .icon { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .icon-sm { width: 18px; height: 18px; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        /* Compact Mode adjustments */
+        .compact-hidden { display: block; }
+        body.compact .compact-hidden { display: none; }
+        body.compact .timer-container { transform: scale(0.85); margin-top: -40px; }
+        body.compact .controls-container { margin-top: -10px; gap: 10px; }
+        
+        /* Smooth transitions */
+        .settings-panel {
+            transition: all 0.3s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .settings-panel.visible {
+            max-height: 200px;
+            opacity: 1;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body class="transition-colors duration-500 bg-[#0f172a] text-slate-100 min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden" id="body-bg">
+    
+    <!-- Header (Hidden in Compact) -->
+    <div class="max-w-md w-full text-center mb-8 compact-hidden">
+        <h1 class="text-4xl font-bold flex items-center justify-center gap-3">
+            <span id="eye-icon-work" class="text-blue-400">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0z"/><circle cx="12" cy="12" r="3"/></svg>
+            </span>
+            <span id="eye-icon-break" class="text-emerald-400 hidden">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+            </span>
+            20-20-20
+        </h1>
+    </div>
+
+    <!-- Main Timer Circle -->
+    <div class="timer-container relative flex items-center justify-center w-64 h-64 md:w-80 md:h-80 transition-transform">
+        <svg class="w-full h-full">
+            <circle cx="50%" cy="50%" r="45%" class="stroke-slate-800 fill-none" stroke-width="8" />
+            <circle id="progress-ring" cx="50%" cy="50%" r="45%" class="progress-ring__circle fill-none stroke-blue-500 shadow-glow" stroke-width="8" stroke-linecap="round" />
+        </svg>
+        
+        <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <span id="status-label" class="text-sm font-medium uppercase tracking-widest text-slate-500">Focus</span>
+            <span id="timer-display" class="text-6xl font-mono font-bold">20:00</span>
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls-container flex flex-wrap justify-center gap-4 mt-10 z-10">
+        <button id="reset-btn" class="p-4 rounded-full bg-slate-800 shadow-xl text-slate-400 hover:text-red-400 transition-colors" title="Reset">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        </button>
+        
+        <button id="toggle-btn" class="p-6 rounded-full shadow-2xl transform transition-transform active:scale-95 bg-blue-600 text-white" title="Start/Pause">
+            <span id="play-icon">
+                <svg class="icon ml-1" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </span>
+            <span id="pause-icon" class="hidden">
+                <svg class="icon" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            </span>
+        </button>
+
+        <button id="settings-toggle-btn" class="p-4 rounded-full bg-slate-800 shadow-xl text-slate-400 hover:text-blue-400 transition-colors" title="Settings">
+            <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+
+        <button id="compact-toggle" class="p-4 rounded-full bg-slate-800 shadow-xl text-slate-400 hover:text-purple-400 transition-colors" title="Widget Mode">
+            <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        </button>
+    </div>
+
+    <!-- Hidden Settings Panel -->
+    <div id="settings-panel" class="settings-panel w-full max-w-sm px-4">
+        <div class="bg-slate-800/50 backdrop-blur-md p-6 rounded-3xl border border-slate-700 shadow-2xl space-y-6">
+            <div class="flex items-center justify-between">
+                <label for="work-duration-input" class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Duration (mins)</label>
+                <input type="number" id="work-duration-input" value="20" min="1" max="120" class="w-16 px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg text-center font-bold text-blue-400 outline-none focus:ring-1 focus:ring-blue-500">
+            </div>
+
+            <div class="flex items-center justify-between">
+                <button id="sound-toggle" class="flex items-center gap-3 px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 transition-colors w-full justify-center">
+                    <span id="sound-on-icon"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span>
+                    <span id="sound-off-icon" class="hidden"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="m8.7 3A6 6 0 0 1 18 8a21.3 21.3 0 0 1 .6 2.8"/><path d="M17 17H3s3-2 3-9a4.67 4.67 0 0 1 .3-1.7"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/><path d="m2 2 20 20"/></svg></span>
+                    <span id="sound-status-text" class="text-sm font-medium">Sound On</span>
+                </button>
+            </div>
+
+            <div class="flex flex-col gap-2 items-center">
+                <button id="notif-btn" class="text-xs text-blue-400 font-semibold uppercase tracking-widest hover:text-blue-300 transition-colors">Enable Alerts</button>
+                <button id="test-btn" class="text-[10px] text-slate-500 hover:text-slate-300 uppercase tracking-widest">Test Notification & Sound</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let workTimeMinutes = 20;
+        let workTimeSeconds = workTimeMinutes * 60;
+        const BREAK_TIME = 20;
+        const CIRCUMFERENCE = 2 * Math.PI * 45;
+
+        let timeLeft = workTimeSeconds;
+        let isActive = false;
+        let isWorking = true;
+        let soundEnabled = true;
+        let timerId = null;
+        let audioCtx = null;
+
+        const timerDisplay = document.getElementById('timer-display');
+        const statusLabel = document.getElementById('status-label');
+        const progressRing = document.getElementById('progress-ring');
+        const bodyBg = document.getElementById('body-bg');
+        const toggleBtn = document.getElementById('toggle-btn');
+        const playIcon = document.getElementById('play-icon');
+        const pauseIcon = document.getElementById('pause-icon');
+        const soundToggle = document.getElementById('sound-toggle');
+        const soundOnIcon = document.getElementById('sound-on-icon');
+        const soundOffIcon = document.getElementById('sound-off-icon');
+        const soundStatusText = document.getElementById('sound-status-text');
+        const eyeIconWork = document.getElementById('eye-icon-work');
+        const eyeIconBreak = document.getElementById('eye-icon-break');
+        const workInput = document.getElementById('work-duration-input');
+        const compactToggle = document.getElementById('compact-toggle');
+        const settingsToggleBtn = document.getElementById('settings-toggle-btn');
+        const settingsPanel = document.getElementById('settings-panel');
+
+        progressRing.style.strokeDasharray = `${CIRCUMFERENCE}%`;
+
+        function playBeep(freq = 440, duration = 0.5, volume = 0.2) {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) { console.error(e); }
+        }
+
+        function sendNotification(title, body) {
+            if (Notification.permission === "granted") {
+                new Notification(title, { body });
+            }
+        }
+
+        function updateUI() {
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            timerDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+            const total = isWorking ? (workTimeMinutes * 60) : BREAK_TIME;
+            const progress = ((total - timeLeft) / total);
+            const offset = CIRCUMFERENCE - (progress * CIRCUMFERENCE);
+            progressRing.style.strokeDashoffset = `${offset}%`;
+
+            if (isWorking) {
+                bodyBg.style.backgroundColor = "#0f172a"; // Slate 900
+                statusLabel.textContent = "Focus";
+                progressRing.classList.remove('stroke-emerald-400');
+                progressRing.classList.add('stroke-blue-500');
+                eyeIconWork.classList.remove('hidden');
+                eyeIconBreak.classList.add('hidden');
+            } else {
+                bodyBg.style.backgroundColor = "#064e3b"; // Emerald 900
+                statusLabel.textContent = "Break";
+                progressRing.classList.remove('stroke-blue-500');
+                progressRing.classList.add('stroke-emerald-400');
+                eyeIconWork.classList.add('hidden');
+                eyeIconBreak.classList.remove('hidden');
+            }
+
+            if (isActive) {
+                playIcon.classList.add('hidden');
+                pauseIcon.classList.remove('hidden');
+                toggleBtn.classList.replace('bg-blue-600', 'bg-orange-500');
+            } else {
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+                toggleBtn.classList.replace('bg-orange-500', 'bg-blue-600');
+            }
+        }
+
+        function handleComplete() {
+            if (isWorking) {
+                playBeep(880, 0.8, 0.4); 
+                isWorking = false;
+                timeLeft = BREAK_TIME;
+                sendNotification("Time for a break!", "Look 20 feet away for 20 seconds.");
+            } else {
+                playBeep(440, 0.5, 0.3);
+                isWorking = true;
+                timeLeft = workTimeMinutes * 60;
+                sendNotification("Break over!", "Back to work.");
+            }
+            updateUI();
+        }
+
+        function tick() {
+            if (isActive && timeLeft > 0) {
+                timeLeft--;
+                if (!isWorking) playBeep(660, 0.2, 0.3); 
+                updateUI();
+            } else if (timeLeft === 0) {
+                handleComplete();
+            }
+        }
+
+        workInput.addEventListener('change', (e) => {
+            let val = parseInt(e.target.value) || 20;
+            workTimeMinutes = Math.max(1, Math.min(120, val));
+            e.target.value = workTimeMinutes;
+            if (isWorking && (!isActive || timeLeft > workTimeMinutes * 60)) {
+                timeLeft = workTimeMinutes * 60;
+                updateUI();
+            }
+        });
+
+        toggleBtn.addEventListener('click', () => {
+            isActive = !isActive;
+            if (isActive && !timerId) timerId = setInterval(tick, 1000);
+            updateUI();
+        });
+
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            isActive = false;
+            isWorking = true;
+            timeLeft = workTimeMinutes * 60;
+            clearInterval(timerId);
+            timerId = null;
+            updateUI();
+        });
+
+        document.getElementById('test-btn').addEventListener('click', () => {
+            playBeep(660, 0.2, 0.3);
+            if (Notification.permission === "granted") {
+                sendNotification("Test Alert", "This is how your break reminders will look.");
+            } else {
+                alert("Please enable alerts first!");
+            }
+        });
+
+        soundToggle.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            soundOnIcon.classList.toggle('hidden', !soundEnabled);
+            soundOffIcon.classList.toggle('hidden', soundEnabled);
+            soundStatusText.textContent = soundEnabled ? 'Sound On' : 'Muted';
+        });
+
+        document.getElementById('notif-btn').addEventListener('click', () => {
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    document.getElementById('notif-btn').textContent = "Alerts Enabled ✓";
+                }
+            });
+        });
+
+        compactToggle.addEventListener('click', () => {
+            document.body.classList.toggle('compact');
+            if (document.body.classList.contains('compact')) {
+                settingsPanel.classList.remove('visible');
+            }
+        });
+
+        settingsToggleBtn.addEventListener('click', () => {
+            settingsPanel.classList.toggle('visible');
+        });
+
+        updateUI();
+    </script>
+</body>
+</html>

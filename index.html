@@ -114,7 +114,6 @@
         let workTimeMinutes = 20;
         let workTimeSeconds = workTimeMinutes * 60;
         const BREAK_TIME = 20;
-        const CIRCUMFERENCE = 2 * Math.PI * 45;
 
         let timeLeft = workTimeSeconds;
         let isActive = false;
@@ -141,7 +140,13 @@
         const settingsToggleBtn = document.getElementById('settings-toggle-btn');
         const settingsPanel = document.getElementById('settings-panel');
 
-        progressRing.style.strokeDasharray = `${CIRCUMFERENCE}%`;
+        // Calculate actual circumference based on the SVG element's radius
+        const radius = progressRing.r.baseVal.valueAsString.includes('%') 
+            ? (progressRing.ownerSVGElement.clientWidth * 0.45) 
+            : progressRing.r.baseVal.value;
+        const CIRCUMFERENCE = 2 * Math.PI * (radius || 144); // fallback to 144 if can't detect
+
+        progressRing.style.strokeDasharray = `${CIRCUMFERENCE}`;
 
         function playBeep(freq = 440, duration = 0.5, volume = 0.2) {
             if (!soundEnabled) return;
@@ -174,32 +179,34 @@
             const total = isWorking ? (workTimeMinutes * 60) : BREAK_TIME;
             const progress = ((total - timeLeft) / total);
             const offset = CIRCUMFERENCE - (progress * CIRCUMFERENCE);
-            progressRing.style.strokeDashoffset = `${offset}%`;
+            progressRing.style.strokeDashoffset = `${offset}`;
 
             if (isWorking) {
-                bodyBg.style.backgroundColor = "#0f172a"; // Slate 900
+                bodyBg.style.backgroundColor = "#0f172a";
                 statusLabel.textContent = "Focus";
                 progressRing.classList.remove('stroke-emerald-400');
                 progressRing.classList.add('stroke-blue-500');
-                eyeIconWork.classList.remove('hidden');
-                eyeIconBreak.classList.add('hidden');
+                if (eyeIconWork) eyeIconWork.classList.remove('hidden');
+                if (eyeIconBreak) eyeIconBreak.classList.add('hidden');
             } else {
-                bodyBg.style.backgroundColor = "#064e3b"; // Emerald 900
+                bodyBg.style.backgroundColor = "#064e3b";
                 statusLabel.textContent = "Break";
                 progressRing.classList.remove('stroke-blue-500');
                 progressRing.classList.add('stroke-emerald-400');
-                eyeIconWork.classList.add('hidden');
-                eyeIconBreak.classList.remove('hidden');
+                if (eyeIconWork) eyeIconWork.classList.add('hidden');
+                if (eyeIconBreak) eyeIconBreak.classList.remove('hidden');
             }
 
             if (isActive) {
                 playIcon.classList.add('hidden');
                 pauseIcon.classList.remove('hidden');
-                toggleBtn.classList.replace('bg-blue-600', 'bg-orange-500');
+                toggleBtn.classList.remove('bg-blue-600');
+                toggleBtn.classList.add('bg-orange-500');
             } else {
                 playIcon.classList.remove('hidden');
                 pauseIcon.classList.add('hidden');
-                toggleBtn.classList.replace('bg-orange-500', 'bg-blue-600');
+                toggleBtn.classList.remove('bg-orange-500');
+                toggleBtn.classList.add('bg-blue-600');
             }
         }
 
@@ -240,7 +247,14 @@
 
         toggleBtn.addEventListener('click', () => {
             isActive = !isActive;
-            if (isActive && !timerId) timerId = setInterval(tick, 1000);
+            if (isActive) {
+                if (!timerId) timerId = setInterval(tick, 1000);
+            } else {
+                if (timerId) {
+                    clearInterval(timerId);
+                    timerId = null;
+                }
+            }
             updateUI();
         });
 
